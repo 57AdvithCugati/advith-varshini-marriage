@@ -418,30 +418,28 @@
     useEffect(() => {
       const el = audioRef.current;
       if (!MUSIC_SRC || !el) return;
-      let started = false;
-      const start = async () => {
-        if (started) return;
-        try {
-          await el.play();
-          started = true;
-          setPlaying(true);
-          cleanup();
-        } catch {
-          /* wait for a gesture */
-        }
+      el.muted = true;
+      el.volume = 1;
+      const tryPlay = async () => {
+        try { await el.play(); setPlaying(true); } catch {}
       };
-      const onGesture = () => { start(); };
+      tryPlay();
+
+      const unmute = () => {
+        el.muted = false;
+        if (el.paused) tryPlay();
+        cleanup();
+      };
       const cleanup = () => {
-        window.removeEventListener("pointerdown", onGesture);
-        window.removeEventListener("keydown", onGesture);
-        window.removeEventListener("touchstart", onGesture);
-        window.removeEventListener("scroll", onGesture);
+        window.removeEventListener("pointerdown", unmute);
+        window.removeEventListener("keydown", unmute);
+        window.removeEventListener("touchstart", unmute);
+        window.removeEventListener("scroll", unmute);
       };
-      start();
-      window.addEventListener("pointerdown", onGesture, { once: false });
-      window.addEventListener("keydown", onGesture, { once: false });
-      window.addEventListener("touchstart", onGesture, { once: false });
-      window.addEventListener("scroll", onGesture, { once: false, passive: true });
+      window.addEventListener("pointerdown", unmute);
+      window.addEventListener("keydown", unmute);
+      window.addEventListener("touchstart", unmute);
+      window.addEventListener("scroll", unmute, { passive: true });
       return cleanup;
     }, []);
 
@@ -452,6 +450,7 @@
         setTimeout(() => setNote(null), 2200);
         return;
       }
+      el.muted = false;
       if (playing) { el.pause(); setPlaying(false); return; }
       try { await el.play(); setPlaying(true); }
       catch { setNote("Tap again to play"); setTimeout(() => setNote(null), 2200); }
@@ -471,7 +470,7 @@
         >
           {playing ? "♪♪" : "♫"}
         </button>
-        {MUSIC_SRC ? <audio ref={audioRef} src={MUSIC_SRC} loop preload="auto" /> : null}
+        {MUSIC_SRC ? <audio ref={audioRef} src={MUSIC_SRC} loop autoPlay playsInline preload="auto" /> : null}
       </div>
     );
   }
