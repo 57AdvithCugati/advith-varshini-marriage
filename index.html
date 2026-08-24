@@ -238,21 +238,13 @@
     const ua = navigator.userAgent;
     const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     if (isIOS) {
-      const esc = (s) => String(s).replace(/\\/g, "\\\\").replace(/,/g, "\\,").replace(/;/g, "\\;").replace(/\n/g, "\\n");
-      const ics = [
-        "BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Wedding//EN","CALSCALE:GREGORIAN","METHOD:PUBLISH",
-        "BEGIN:VEVENT",
-        `UID:${start.getTime()}@wedding`,
-        `DTSTAMP:${fmt(new Date())}`,
-        `DTSTART:${fmt(start)}`,
-        `DTEND:${fmt(end)}`,
-        `SUMMARY:${esc(CALENDAR_TITLE)}`,
-        `LOCATION:${esc(CALENDAR_LOCATION)}`,
-        `DESCRIPTION:${esc(CALENDAR_DETAILS)}`,
-        "BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:Reminder","TRIGGER:-P1D","END:VALARM",
-        "END:VEVENT","END:VCALENDAR",
-      ].join("\r\n");
-      window.location.href = "data:text/calendar;charset=utf-8," + encodeURIComponent(ics);
+      const a = document.createElement("a");
+      a.href = "Advith-Varshini-Marriage.ics";
+      a.rel = "noopener";
+      a.target = "_blank";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
       return;
     }
     const gcal = "https://calendar.google.com/calendar/render?action=TEMPLATE"
