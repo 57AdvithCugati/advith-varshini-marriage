@@ -545,11 +545,9 @@
       const payload = { name: name.trim(), guests: count, attendance, message: message.trim() };
       console.info("RSVP submitted", payload);
 
-      const attendanceLabel = attendance === "yes"
-        ? "Joyfully attending 💐"
-        : attendance === "maybe"
-          ? "Tentative"
-          : "Regretfully unable to attend";
+      const attendanceLabel = attendance === "accept"
+        ? "Joyfully Accept 💐"
+        : "Regretfully Decline";
       const lines = [
         "*Wedding RSVP — Advith & Varshini*",
         "",
