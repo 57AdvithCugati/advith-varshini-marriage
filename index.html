@@ -216,7 +216,8 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <script type="text/plain" id="app-jsx">
-  const { useCallback, useEffect, useRef, useState } = React;
+  const { useCallback, useEffect, useRef, useState, useContext, createContext } = React;
+  const RevealContext = createContext({ revealed: false, reveal: () => {} });
 
   /* ---------- lib/wedding constants ---------- */
   const WEDDING_DATE = new Date("2026-11-29T08:05:00+05:30");
@@ -741,6 +742,11 @@
     const drawing = useRef(false);
     const last = useRef(null);
     const [revealed, setRevealed] = useState(false);
+    const revealCtx = useContext(RevealContext);
+
+    useEffect(() => {
+      if (revealed) revealCtx.reveal();
+    }, [revealed, revealCtx]);
 
     const paintCover = useCallback((canvas) => {
       const rect = canvas.getBoundingClientRect();
@@ -777,6 +783,8 @@
       ctx.fillStyle = "#7a3b28";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
+      ctx.font = `italic 500 ${Math.max(13, rect.width * 0.038)}px Mulish, sans-serif`;
+      ctx.fillText("Excited to know when & where?", rect.width / 2, rect.height / 2 - 40);
       ctx.font = `600 ${Math.max(16, rect.width * 0.055)}px Mulish, sans-serif`;
       ctx.fillText("Scratch Me \u2665", rect.width / 2, rect.height / 2 - 6);
       ctx.font = `400 ${Math.max(10, rect.width * 0.028)}px Mulish, sans-serif`;
@@ -1258,21 +1266,37 @@
 
   function App() {
     const isMobile = useIsMobile();
+    const [revealed, setRevealed] = useState(false);
+    const reveal = useCallback(() => setRevealed(true), []);
     return (
-      <div className="relative">
-        <Petals density={isMobile ? 0.5 : 1} />
-        <Nav />
-        <main className="relative z-10">
-          <Hero />
-          <Compliments />
-          <Functions />
-          <WeddingDetails />
-          <RsvpSection />
-          <Location />
-        </main>
-        <Footer />
-        <MusicToggle />
-      </div>
+      <RevealContext.Provider value={{ revealed, reveal }}>
+        <div className="relative">
+          <Petals density={isMobile ? 0.5 : 1} />
+          <Nav />
+          <main className="relative z-10">
+            <Hero />
+            <div
+              aria-hidden={!revealed}
+              style={{
+                opacity: revealed ? 1 : 0,
+                transform: revealed ? "translateY(0)" : "translateY(24px)",
+                transition: "opacity 1s ease, transform 1s ease",
+                pointerEvents: revealed ? "auto" : "none",
+                maxHeight: revealed ? "none" : "0",
+                overflow: revealed ? "visible" : "hidden",
+              }}
+            >
+              <Compliments />
+              <Functions />
+              <WeddingDetails />
+              <RsvpSection />
+              <Location />
+            </div>
+          </main>
+          {revealed && <Footer />}
+          <MusicToggle />
+        </div>
+      </RevealContext.Provider>
     );
   }
 
